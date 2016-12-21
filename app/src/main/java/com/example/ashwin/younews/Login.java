@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -26,6 +27,8 @@ public class Login extends AppCompatActivity {
     private RadioButton rb2;
     private TextView tv;
     private TextView feed1;
+    private String[] politicalSources = new String[]{"associated_press", "cnn", "independent",
+            "reuters", "the-new-york-times", "the-huffington-post", "the-wall-street-journal"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,15 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.feed);
         feed1 = (TextView) findViewById(R.id.feedtv1);
         new AsyncClass().execute();
+        RadioGroup rg = (RadioGroup) findViewById(R.id.radioG);
+        if (rg.getCheckedRadioButtonId() == R.id.RadioButton1) {
+            Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
+            String topicForFeed = spinner1.getSelectedItem().toString();
+        }
+        if (rg.getCheckedRadioButtonId() == R.id.radioButton2) {
+            TextView utv = (TextView) findViewById(R.id.tv10);
+            String usersTopic = utv.getText().toString();
+        }
     }
 
     public void categoryChosen(View v) {

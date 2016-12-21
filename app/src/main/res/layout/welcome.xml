@@ -27,14 +27,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="182dp" />
 
-    <Spinner
-        android:id="@+id/spinner1"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        tools:visibility="invisible" />
-
     <Button
         android:text="call"
         android:layout_width="wrap_content"
@@ -56,11 +48,33 @@
         android:id="@+id/button7"
         android:onClick="toFeed" />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:id="@+id/tv10"
+        android:hint="Enter Topic"
+        android:visibility="invisible"
+        android:layout_above="@+id/callView"
+        android:layout_alignLeft="@+id/button7"
+        android:layout_alignStart="@+id/button7"
+        android:layout_marginBottom="24dp" />
+
+    <Spinner
+        android:id="@+id/spinner1"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        tools:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:layout_below="@+id/textView9"
+        android:id="@+id/radioG"
+        android:layout_alignParentTop="true"
         android:layout_alignLeft="@+id/tv10"
         android:layout_alignStart="@+id/tv10">
 
@@ -88,19 +102,6 @@
         android:layout_alignStart="@+id/button3" />
 
     </RadioGroup>
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/tv10"
-        android:hint="Enter Topic"
-        android:visibility="invisible"
-        android:layout_above="@+id/callView"
-        android:layout_alignLeft="@+id/button7"
-        android:layout_alignStart="@+id/button7"
-        android:layout_marginBottom="24dp" />
 
 
 </RelativeLayout>
