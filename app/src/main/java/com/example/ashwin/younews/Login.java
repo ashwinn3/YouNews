@@ -30,6 +30,8 @@ public class Login extends AppCompatActivity {
     private String[] politicalSources = new String[]{"associated-press", "cnn", "independent",
             "reuters", "the-new-york-times", "the-huffington-post", "the-wall-street-journal"};
     private String topicForFeed = "Entertainment";
+    private Spinner spinner1;
+    private TextView utv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +54,30 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.feed);
         feed1 = (TextView) findViewById(R.id.feedtv1);
         new AsyncClass().execute();
-        RadioGroup rg = (RadioGroup) findViewById(R.id.radioG);
-        if (rg != null) {
-            if (rg.getCheckedRadioButtonId() == R.id.RadioButton1) {
+
+        RadioGroup rg = (RadioGroup) super.findViewById(R.id.radioG);
+
+
+
+        //rg.setOnCheckedChangeListener(new changeIsMade());
+        rb1.setChecked(true);
+
+        if (rb1.isChecked()) {
+            topicForFeed = spinner1.getSelectedItem().toString();
+        } else if (rb2.isChecked()) {
+            topicForFeed = utv.getText().toString();
+        }
+    }
+
+    private class changeIsMade implements RadioGroup.OnCheckedChangeListener {
+
+        @Override
+        public void onCheckedChanged(RadioGroup radioGroup, int i) {
+            if (i == (findViewById(R.id.RadioButton1)).getId()) {
                 Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
                 topicForFeed = spinner1.getSelectedItem().toString();
             }
-            if (rg.getCheckedRadioButtonId() == R.id.radioButton2) {
+            if (i == (findViewById(R.id.radioButton2).getId())) {
                 TextView utv = (TextView) findViewById(R.id.tv10);
                 topicForFeed = utv.getText().toString();
             }
@@ -74,6 +93,10 @@ public class Login extends AppCompatActivity {
         sp1.setAdapter(adapter);
         tv = (TextView) findViewById(R.id.tv10);
         tv.setVisibility(View.INVISIBLE);
+        rb1 = (RadioButton) v.findViewById(R.id.RadioButton1);
+        rb2 = (RadioButton) v.findViewById(R.id.radioButton2);
+        spinner1 = (Spinner) findViewById(R.id.spinner1);
+
     }
 
     public void topicChosen(View v) {
@@ -81,6 +104,10 @@ public class Login extends AppCompatActivity {
         sp1.setVisibility(View.INVISIBLE);
         tv = (TextView) findViewById(R.id.tv10);
         tv.setVisibility(View.VISIBLE);
+        rb1 = (RadioButton) v.findViewById(R.id.RadioButton1);
+        rb2 = (RadioButton) v.findViewById(R.id.radioButton2);
+        utv = (TextView) findViewById(R.id.tv10);
+
     }
 
     public class AsyncClass extends AsyncTask<String, Void, String> {
@@ -92,6 +119,8 @@ public class Login extends AppCompatActivity {
                 StringBuilder result = new StringBuilder();
                 URL url;
                 if (topicForFeed.equals("Politics")) {
+                    url = new URL("https://newsapi.org/v1/articles?source=" + politicalSources[0] + "&sortBy=latest&apiKey=5af1a6765ca944788b515339c1b990ea");
+                } else if (topicForFeed.equals("Entertainment")) {
                     url = new URL("https://newsapi.org/v1/articles?source=" + politicalSources[0] + "&sortBy=latest&apiKey=5af1a6765ca944788b515339c1b990ea");
                 } else {
                     url = new URL("https://newsapi.org/v1/articles?source=techcrunch&sortBy=latest&apiKey=5af1a6765ca944788b515339c1b990ea");
