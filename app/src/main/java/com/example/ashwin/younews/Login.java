@@ -27,8 +27,9 @@ public class Login extends AppCompatActivity {
     private RadioButton rb2;
     private TextView tv;
     private TextView feed1;
-    private String[] politicalSources = new String[]{"associated_press", "cnn", "independent",
+    private String[] politicalSources = new String[]{"associated-press", "cnn", "independent",
             "reuters", "the-new-york-times", "the-huffington-post", "the-wall-street-journal"};
+    private String topicForFeed = "Entertainment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +53,15 @@ public class Login extends AppCompatActivity {
         feed1 = (TextView) findViewById(R.id.feedtv1);
         new AsyncClass().execute();
         RadioGroup rg = (RadioGroup) findViewById(R.id.radioG);
-        if (rg.getCheckedRadioButtonId() == R.id.RadioButton1) {
-            Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
-            String topicForFeed = spinner1.getSelectedItem().toString();
-        }
-        if (rg.getCheckedRadioButtonId() == R.id.radioButton2) {
-            TextView utv = (TextView) findViewById(R.id.tv10);
-            String usersTopic = utv.getText().toString();
+        if (rg != null) {
+            if (rg.getCheckedRadioButtonId() == R.id.RadioButton1) {
+                Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
+                topicForFeed = spinner1.getSelectedItem().toString();
+            }
+            if (rg.getCheckedRadioButtonId() == R.id.radioButton2) {
+                TextView utv = (TextView) findViewById(R.id.tv10);
+                topicForFeed = utv.getText().toString();
+            }
         }
     }
 
@@ -87,7 +90,12 @@ public class Login extends AppCompatActivity {
             something = (TextView) findViewById(R.id.callView);
             try {
                 StringBuilder result = new StringBuilder();
-                URL url = new URL("https://newsapi.org/v1/articles?source=techcrunch&sortBy=latest&apiKey=5af1a6765ca944788b515339c1b990ea");
+                URL url;
+                if (topicForFeed.equals("Politics")) {
+                    url = new URL("https://newsapi.org/v1/articles?source=" + politicalSources[0] + "&sortBy=latest&apiKey=5af1a6765ca944788b515339c1b990ea");
+                } else {
+                    url = new URL("https://newsapi.org/v1/articles?source=techcrunch&sortBy=latest&apiKey=5af1a6765ca944788b515339c1b990ea");
+                }
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -106,7 +114,7 @@ public class Login extends AppCompatActivity {
         protected void onPostExecute(String some) {
             try {
                 JSONObject obj = new JSONObject(some);
-                feed1.setText(obj.get("articles").toString());
+                feed1.setText(obj.get("source").toString());
             } catch (Exception e) {
                 feed1.setText(e.toString());
             }
