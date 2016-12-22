@@ -3,6 +3,8 @@ package com.example.ashwin.younews;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
@@ -10,14 +12,13 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
 public class Login extends AppCompatActivity {
 
@@ -46,41 +47,17 @@ public class Login extends AppCompatActivity {
     public void callClick(View v) {
         something = (TextView) findViewById(R.id.callView);
         new AsyncClass().execute();
-        //something.setText(someI.toString());
-        //something.append("hi");
     }
 
     public void toFeed(View v) {
         setContentView(R.layout.feed);
         feed1 = (TextView) findViewById(R.id.feedtv1);
         new AsyncClass().execute();
-
-        RadioGroup rg = (RadioGroup) super.findViewById(R.id.radioG);
-
-
-
-        //rg.setOnCheckedChangeListener(new changeIsMade());
         rb1.setChecked(true);
-
         if (rb1.isChecked()) {
             topicForFeed = spinner1.getSelectedItem().toString();
         } else if (rb2.isChecked()) {
             topicForFeed = utv.getText().toString();
-        }
-    }
-
-    private class changeIsMade implements RadioGroup.OnCheckedChangeListener {
-
-        @Override
-        public void onCheckedChanged(RadioGroup radioGroup, int i) {
-            if (i == (findViewById(R.id.RadioButton1)).getId()) {
-                Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
-                topicForFeed = spinner1.getSelectedItem().toString();
-            }
-            if (i == (findViewById(R.id.radioButton2).getId())) {
-                TextView utv = (TextView) findViewById(R.id.tv10);
-                topicForFeed = utv.getText().toString();
-            }
         }
     }
 
@@ -143,7 +120,13 @@ public class Login extends AppCompatActivity {
         protected void onPostExecute(String some) {
             try {
                 JSONObject obj = new JSONObject(some);
-                feed1.setText(obj.get("source").toString());
+                JSONArray objArr = obj.getJSONArray("articles");
+                //feed1.setText(obj.get("source").toString());
+                //JSONObject otherObj = (JSONObject) objArr.get(0);
+                String text = "<body><font size=20>"+ obj.get("source").toString() + "</font></body>";
+                Spanned spanned1 = Html.fromHtml(text);
+                feed1.setText(spanned1);
+                feed1.append( "\n" + ((JSONObject) objArr.get(0)).get("title").toString());
             } catch (Exception e) {
                 feed1.setText(e.toString());
             }
