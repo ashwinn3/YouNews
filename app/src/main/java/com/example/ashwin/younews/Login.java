@@ -1,10 +1,14 @@
 package com.example.ashwin.younews;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
@@ -123,10 +127,17 @@ public class Login extends AppCompatActivity {
                 JSONArray objArr = obj.getJSONArray("articles");
                 //feed1.setText(obj.get("source").toString());
                 //JSONObject otherObj = (JSONObject) objArr.get(0);
-                String text = "<body><font size=20>"+ obj.get("source").toString() + "</font></body>";
-                Spanned spanned1 = Html.fromHtml(text);
-                feed1.setText(spanned1);
-                feed1.append( "\n" + ((JSONObject) objArr.get(0)).get("title").toString());
+                feed1.setText(objArr.length() + "\n");
+                for (int i = 0; i < objArr.length(); i++) {
+                    String text = obj.get("source").toString();
+                    text.replace("-", " ");
+                    feed1.append(text);
+                    String addText = "\n" + ((JSONObject) objArr.get(i)).get("title").toString() + "\n\n";
+                    SpannableString ss2 = new SpannableString(addText);
+                    ss2.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
+                    ss2.setSpan(new ForegroundColorSpan(Color.BLACK), 0, addText.length(), 0);
+                    feed1.append(ss2);
+                }
             } catch (Exception e) {
                 feed1.setText(e.toString());
             }
