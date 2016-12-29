@@ -10,7 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.ashwin.younews.Login">
 
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -28,7 +27,9 @@
                 android:layout_height="match_parent"
                 android:id="@+id/feedtv1"
                 android:maxLines="100"
+                android:autoLink="web"
                 android:layout_weight="0.56" />
         </ScrollView>
     </LinearLayout>
+
 </RelativeLayout>

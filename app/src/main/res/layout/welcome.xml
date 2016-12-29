@@ -10,6 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.ashwin.younews.Filters">
 
+
     <TextView
         android:text="How would you like to filter your feed?"
         android:layout_width="wrap_content"
