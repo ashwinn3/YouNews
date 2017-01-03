@@ -17,6 +17,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:id="@+id/title_complex">
         android:weightSum="1">
         <ScrollView
             android:layout_width="match_parent"
