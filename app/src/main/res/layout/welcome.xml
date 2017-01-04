@@ -28,27 +28,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="182dp" />
 
-    <Button
-        android:text="call"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button3"
-        android:onClick="callClick"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="45dp" />
-
-    <Button
-        android:text="OK"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button3"
-        android:layout_alignRight="@+id/button3"
-        android:layout_alignEnd="@+id/button3"
-        android:layout_marginBottom="27dp"
-        android:id="@+id/button7"
-        android:onClick="toFeed" />
-
     <Spinner
         android:id="@+id/spinner1"
         android:layout_height="wrap_content"
@@ -89,6 +68,19 @@
         android:layout_alignStart="@+id/button3" />
 
     </RadioGroup>
+
+    <Button
+        android:text="OK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button7"
+        android:onClick="toFeed"
+        android:layout_alignTop="@+id/callView"
+        android:layout_alignRight="@+id/radioG"
+        android:layout_alignEnd="@+id/radioG"
+        android:layout_marginRight="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginTop="13dp" />
 
 
 </RelativeLayout>

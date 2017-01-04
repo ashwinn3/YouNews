@@ -1,7 +1,9 @@
 package com.example.ashwin.younews;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -9,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
@@ -22,6 +25,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -46,7 +50,7 @@ public class Login extends AppCompatActivity {
     private RadioButton rb1;
     private RadioButton rb2;
     private TextView tv;
-    private TextView feed1;
+    private ListView feed1;
     private ListView list1;
     private String[] politicalSources = new String[]{"associated-press", "cnn", "independent",
             "reuters", "the-new-york-times", "the-huffington-post", "the-wall-street-journal", "the-washington-post"};
@@ -61,6 +65,7 @@ public class Login extends AppCompatActivity {
     private TextView utv;
     private int counter = 0;
     private boolean catChosen;
+    private ProgressBar spinner;
     //"engadget", "hacker-news"
     //, "espn-cric-info", "football-italia",
 
@@ -78,12 +83,15 @@ public class Login extends AppCompatActivity {
         return true;
     }
 
+    private boolean aBool = false;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         if (item.getItemId() == R.id.action_favorite) {
             setContentView(R.layout.feed);
             counter++;
-            feed1 = (TextView) findViewById(R.id.feedtv1);
+            feed1 = (ListView) findViewById(R.id.feedtv1);
             new AsyncClass().execute();
         } else {
             setContentView(R.layout.welcome);
@@ -103,7 +111,7 @@ public class Login extends AppCompatActivity {
     public void toFeed(View v) {
         if (catChosen) {
             setContentView(R.layout.feed);
-            feed1 = (TextView) findViewById(R.id.feedtv1);
+            feed1 = (ListView) findViewById(R.id.feedtv1);
             new AsyncClass().execute();
             topicForFeed = spinner1.getSelectedItem().toString();
         } else {
@@ -240,16 +248,24 @@ public class Login extends AppCompatActivity {
         private HashMap<String, String> niceToReal = new HashMap<>();
 
         @Override
+        protected void onPreExecute() {
+            spinner = (ProgressBar)findViewById(R.id.progressBar1);
+            spinner.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected void onPostExecute(ArrayList<String> some) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
+            spinner = (ProgressBar)findViewById(R.id.progressBar1);
+            spinner.setVisibility(View.GONE);
             if (topicForFeed.equals("publication")) {
                 try {
                     AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
                         public void onItemClick(AdapterView parent, View v, int position, long id) {
                             Log.d("creator", parent.getItemAtPosition(position).toString());
-                            setContentView(R.layout.feed);
-                            feed1 = (TextView) findViewById(R.id.feedtv1);
+                            setContentView(R.layout.publicationfeed);
+                            feed1 = (ListView) findViewById(R.id.feedtv1);
                             try {
                                 StringBuilder result = new StringBuilder();
                                 URL url = new URL("https://newsapi.org/v1/articles?source=" + niceToReal.get(parent.getItemAtPosition(position).toString()) + "&sortBy=top&apiKey=5af1a6765ca944788b515339c1b990ea");
@@ -262,33 +278,53 @@ public class Login extends AppCompatActivity {
                                 }
                                 rd.close();
                                 JSONArray arts = (new JSONObject(result.toString())).getJSONArray("articles");
-                                feed1.append(parent.getItemAtPosition(position).toString() + "\n\n");
+                                spinner = (ProgressBar)findViewById(R.id.progressBar1);
+                                spinner.setVisibility(View.GONE);
+                                //feed1.append(parent.getItemAtPosition(position).toString() + "\n\n");
+                                SpannableString[] adapt = new SpannableString[arts.length()];
+                                final HashMap<Integer, String> numToURL = new HashMap<>();
                                 for (int y = 0; y < arts.length(); y++) {
+                                    SpannableString fSpan = new SpannableString("\n" + parent.getItemAtPosition(position).toString() + "\n\n");
                                     URL url1 = new URL(((JSONObject) arts.get(y)).get("urlToImage").toString());
                                     InputStream is = (InputStream) url1.getContent();
                                     Drawable d = Drawable.createFromStream(is, "src name");
                                     d.setBounds(0, 0, 1000, 600);
                                     SpannableString ss2 = new SpannableString("                " + "\n");
                                     ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                                    feed1.append(ss2);
+                                    //feed1.append(ss2);
+                                    fSpan = new SpannableString(TextUtils.concat(fSpan, ss2));
                                     StringBuilder s3 = new StringBuilder();
+                                    /*
                                     for (int p = 0; p < 65; p++) {
                                         s3.append("_");
-                                    }
+                                    }*/
                                     String addText = ((JSONObject) arts.get(y)).get("title").toString() + "\n";
                                     SpannableString ss1 = new SpannableString(addText);
                                     ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
                                     ss1.setSpan(new ForegroundColorSpan(Color.BLACK), 0, addText.length(), 0);
                                     String addURL = ((JSONObject) arts.get(y)).get("url").toString();
                                     ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                    feed1.append(ss1);
-                                    feed1.append(s3 + "\n\n");
+                                    numToURL.put(y, addURL);
+                                    //feed1.append(ss1);
+                                    //feed1.append(s3 + "\n\n");
                                     feed1.setClickable(true);
-                                    feed1.setLinksClickable(true);
-                                    feed1.setMovementMethod(LinkMovementMethod.getInstance());
+                                    fSpan = new SpannableString(TextUtils.concat(fSpan, ss1, s3 + "\n"));
+                                    adapt[y] = fSpan;
+                                    //feed1.setMovementMethod(LinkMovementMethod.getInstance());
                                 }
+                                ArrayAdapter arrayForList = new ArrayAdapter(Login.this, android.R.layout.simple_list_item_1, adapt);
+                                feed1.setAdapter(arrayForList);
+                                AdapterView.OnItemClickListener meth2 = new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView adapterView, View view, int i, long l) {
+                                        Uri uri = Uri.parse(numToURL.get(i));
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                        startActivity(intent);
+                                    }
+                                };
+                                feed1.setOnItemClickListener(meth2);
                             } catch (Exception e) {
-                                feed1.append(e.toString() + "    7");
+                                Log.d("creator", e.toString());
                             }
                         }
                     };
@@ -303,7 +339,8 @@ public class Login extends AppCompatActivity {
                     list1.setAdapter(arrayForList);
                     list1.setOnItemClickListener(mMessageClickedHandler);
                 } catch (Exception e) {
-                    feed1.setText(e.toString());
+                    //feed1.setText(e.toString());
+                    Log.d("creator", "error1");
                 }
             } else {
                 try {
@@ -314,10 +351,13 @@ public class Login extends AppCompatActivity {
                         objects[count] = new JSONObject(thing);
                         count++;
                     }
+                    SpannableString[] adapt2 = new SpannableString[length];
+                    final HashMap<Integer, String> numToURL = new HashMap<>();
                     for (int i = 0; i < length; i++) {
                         String source = objects[i].get("source").toString();
                         source.replace("-", " ");
-                        feed1.append(source + "\n");
+                        //feed1.append(source + "\n");
+                        SpannableString f2Span = new SpannableString("\n" + source + "\n");
                         JSONArray arr = objects[i].getJSONArray("articles");
                         int newCounter = counter % arr.length();
                         URL url = new URL(((JSONObject) arr.get(newCounter)).get("urlToImage").toString());
@@ -326,25 +366,45 @@ public class Login extends AppCompatActivity {
                         d.setBounds(0, 0, 1000, 600);
                         SpannableString ss2 = new SpannableString("                " + "\n");
                         ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        feed1.append(ss2);
+                        //feed1.append(ss2);
+                        //f2Span = (SpannableString) TextUtils.concat(f2Span, ss2);
+                        //String f2Span1 = TextUtils.concat(f2Span, ss2).toString();
+                        f2Span = new SpannableString(TextUtils.concat(f2Span, ss2));
                         StringBuilder s3 = new StringBuilder();
+                        /*
                         for (int p = 0; p < 65; p++) {
                             s3.append("_");
-                        }
+                        }*/
                         String addText = ((JSONObject) arr.get(newCounter)).get("title").toString() + "\n";
                         SpannableString ss1 = new SpannableString(addText);
                         ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
                         ss1.setSpan(new ForegroundColorSpan(Color.BLACK), 0, addText.length(), 0);
                         String addURL = ((JSONObject) arr.get(newCounter)).get("url").toString();
                         ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        feed1.append(ss1);
-                        feed1.append(s3 + "\n\n");
+                        numToURL.put(i, addURL);
+                        //feed1.append(ss1);
+                        //feed1.append(s3 + "\n\n");
+                        //String finale = TextUtils.concat(f2Span, ss1, s3 + "\n\n").toString();
+                        f2Span = new SpannableString(TextUtils.concat(f2Span, ss1, s3 + "\n"));
+                        adapt2[i] = f2Span;
                         feed1.setClickable(true);
-                        feed1.setLinksClickable(true);
-                        feed1.setMovementMethod(LinkMovementMethod.getInstance());
+                        //feed1.setLinksClickable(true);
+                        //feed1.setMovementMethod(LinkMovementMethod.getInstance());
                     }
+                    ArrayAdapter arrayForList = new ArrayAdapter(Login.this, android.R.layout.simple_list_item_1, adapt2);
+                    feed1.setAdapter(arrayForList);
+                    AdapterView.OnItemClickListener meth1 = new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView adapterView, View view, int i, long l) {
+                            Uri uri = Uri.parse(numToURL.get(i));
+                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                            startActivity(intent);
+                        }
+                    };
+                    feed1.setOnItemClickListener(meth1);
                 } catch (Exception e) {
-                    feed1.setText(e.toString() + "\n\n");
+                    //feed1.setText(e.toString() + "\n\n");
+                    Log.d("creator", e.toString());
                 }
             }
         }
