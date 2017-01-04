@@ -280,7 +280,6 @@ public class Login extends AppCompatActivity {
                                 JSONArray arts = (new JSONObject(result.toString())).getJSONArray("articles");
                                 spinner = (ProgressBar)findViewById(R.id.progressBar1);
                                 spinner.setVisibility(View.GONE);
-                                //feed1.append(parent.getItemAtPosition(position).toString() + "\n\n");
                                 SpannableString[] adapt = new SpannableString[arts.length()];
                                 final HashMap<Integer, String> numToURL = new HashMap<>();
                                 for (int y = 0; y < arts.length(); y++) {
@@ -291,13 +290,8 @@ public class Login extends AppCompatActivity {
                                     d.setBounds(0, 0, 1000, 600);
                                     SpannableString ss2 = new SpannableString("                " + "\n");
                                     ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                                    //feed1.append(ss2);
                                     fSpan = new SpannableString(TextUtils.concat(fSpan, ss2));
                                     StringBuilder s3 = new StringBuilder();
-                                    /*
-                                    for (int p = 0; p < 65; p++) {
-                                        s3.append("_");
-                                    }*/
                                     String addText = ((JSONObject) arts.get(y)).get("title").toString() + "\n";
                                     SpannableString ss1 = new SpannableString(addText);
                                     ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
@@ -305,12 +299,9 @@ public class Login extends AppCompatActivity {
                                     String addURL = ((JSONObject) arts.get(y)).get("url").toString();
                                     ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                                     numToURL.put(y, addURL);
-                                    //feed1.append(ss1);
-                                    //feed1.append(s3 + "\n\n");
                                     feed1.setClickable(true);
                                     fSpan = new SpannableString(TextUtils.concat(fSpan, ss1, s3 + "\n"));
                                     adapt[y] = fSpan;
-                                    //feed1.setMovementMethod(LinkMovementMethod.getInstance());
                                 }
                                 ArrayAdapter arrayForList = new ArrayAdapter(Login.this, android.R.layout.simple_list_item_1, adapt);
                                 feed1.setAdapter(arrayForList);
@@ -356,7 +347,6 @@ public class Login extends AppCompatActivity {
                     for (int i = 0; i < length; i++) {
                         String source = objects[i].get("source").toString();
                         source.replace("-", " ");
-                        //feed1.append(source + "\n");
                         SpannableString f2Span = new SpannableString("\n" + source + "\n");
                         JSONArray arr = objects[i].getJSONArray("articles");
                         int newCounter = counter % arr.length();
@@ -366,15 +356,8 @@ public class Login extends AppCompatActivity {
                         d.setBounds(0, 0, 1000, 600);
                         SpannableString ss2 = new SpannableString("                " + "\n");
                         ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        //feed1.append(ss2);
-                        //f2Span = (SpannableString) TextUtils.concat(f2Span, ss2);
-                        //String f2Span1 = TextUtils.concat(f2Span, ss2).toString();
                         f2Span = new SpannableString(TextUtils.concat(f2Span, ss2));
                         StringBuilder s3 = new StringBuilder();
-                        /*
-                        for (int p = 0; p < 65; p++) {
-                            s3.append("_");
-                        }*/
                         String addText = ((JSONObject) arr.get(newCounter)).get("title").toString() + "\n";
                         SpannableString ss1 = new SpannableString(addText);
                         ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
@@ -382,14 +365,9 @@ public class Login extends AppCompatActivity {
                         String addURL = ((JSONObject) arr.get(newCounter)).get("url").toString();
                         ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         numToURL.put(i, addURL);
-                        //feed1.append(ss1);
-                        //feed1.append(s3 + "\n\n");
-                        //String finale = TextUtils.concat(f2Span, ss1, s3 + "\n\n").toString();
                         f2Span = new SpannableString(TextUtils.concat(f2Span, ss1, s3 + "\n"));
                         adapt2[i] = f2Span;
                         feed1.setClickable(true);
-                        //feed1.setLinksClickable(true);
-                        //feed1.setMovementMethod(LinkMovementMethod.getInstance());
                     }
                     ArrayAdapter arrayForList = new ArrayAdapter(Login.this, android.R.layout.simple_list_item_1, adapt2);
                     feed1.setAdapter(arrayForList);
