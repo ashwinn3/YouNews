@@ -49,19 +49,6 @@
         android:id="@+id/button7"
         android:onClick="toFeed" />
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/tv10"
-        android:hint="Enter Topic"
-        android:visibility="invisible"
-        android:layout_above="@+id/callView"
-        android:layout_alignLeft="@+id/button7"
-        android:layout_alignStart="@+id/button7"
-        android:layout_marginBottom="24dp" />
-
     <Spinner
         android:id="@+id/spinner1"
         android:layout_height="wrap_content"
@@ -76,8 +63,7 @@
         android:layout_marginTop="12dp"
         android:id="@+id/radioG"
         android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/tv10"
-        android:layout_alignStart="@+id/tv10">
+        android:layout_centerHorizontal="true">
 
     <RadioButton
         android:text="Category of news"
@@ -92,7 +78,7 @@
         android:allowUndo="true" />
 
         <RadioButton
-        android:text="Specific Topic"
+        android:text="Specific Publication"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="17dp"

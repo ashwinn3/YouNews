@@ -14,11 +14,14 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,6 +35,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 
 public class Login extends AppCompatActivity {
@@ -42,6 +47,7 @@ public class Login extends AppCompatActivity {
     private RadioButton rb2;
     private TextView tv;
     private TextView feed1;
+    private ListView list1;
     private String[] politicalSources = new String[]{"associated-press", "cnn", "independent",
             "reuters", "the-new-york-times", "the-huffington-post", "the-wall-street-journal", "the-washington-post"};
     private String[] entertainmentSources = new String[]{"buzzfeed", "daily-mail", "entertainment-weekly",
@@ -50,9 +56,11 @@ public class Login extends AppCompatActivity {
             "four-four-two", "fox-sports", "nfl-news", "sky-sports-news", "talksport", "the-sport-bible"};
     private String[] technologySources = new String[] {"ars-technica", "recode", "t3n", "techcrunch", "the-verge", "techradar"};
     private String topicForFeed = "Entertainment";
+    private String[] allPublications = concatAll(politicalSources, entertainmentSources, sportsSources, technologySources);
     private Spinner spinner1;
     private TextView utv;
     private int counter = 0;
+    private boolean catChosen;
     //"engadget", "hacker-news"
     //, "espn-cric-info", "football-italia",
 
@@ -93,14 +101,16 @@ public class Login extends AppCompatActivity {
     }
 
     public void toFeed(View v) {
-        setContentView(R.layout.feed);
-        feed1 = (TextView) findViewById(R.id.feedtv1);
-        new AsyncClass().execute();
-        rb1.setChecked(true);
-        if (rb1.isChecked()) {
+        if (catChosen) {
+            setContentView(R.layout.feed);
+            feed1 = (TextView) findViewById(R.id.feedtv1);
+            new AsyncClass().execute();
             topicForFeed = spinner1.getSelectedItem().toString();
-        } else if (rb2.isChecked()) {
-            topicForFeed = utv.getText().toString();
+        } else {
+            setContentView(R.layout.publications);
+            list1 = (ListView) findViewById(R.id.lister);
+            new AsyncClass().execute();
+            topicForFeed = "publication";
         }
     }
 
@@ -111,10 +121,10 @@ public class Login extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, categories);
         sp1.setAdapter(adapter);
-        tv = (TextView) findViewById(R.id.tv10);
-        tv.setVisibility(View.INVISIBLE);
         rb1 = (RadioButton) v.findViewById(R.id.RadioButton1);
         rb2 = (RadioButton) v.findViewById(R.id.radioButton2);
+        rb1.setChecked(true);
+        catChosen = true;
         spinner1 = (Spinner) findViewById(R.id.spinner1);
 
     }
@@ -122,12 +132,24 @@ public class Login extends AppCompatActivity {
     public void topicChosen(View v) {
         sp1 = (Spinner) findViewById(R.id.spinner1);
         sp1.setVisibility(View.INVISIBLE);
-        tv = (TextView) findViewById(R.id.tv10);
-        tv.setVisibility(View.VISIBLE);
         rb1 = (RadioButton) v.findViewById(R.id.RadioButton1);
         rb2 = (RadioButton) v.findViewById(R.id.radioButton2);
-        utv = (TextView) findViewById(R.id.tv10);
+        rb2.setChecked(true);
+        catChosen = false;
+    }
 
+    public static <T> T[] concatAll(T[] first, T[]... rest) {
+        int totalLength = first.length;
+        for (T[] array : rest) {
+            totalLength += array.length;
+        }
+        T[] result = Arrays.copyOf(first, totalLength);
+        int offset = first.length;
+        for (T[] array : rest) {
+            System.arraycopy(array, 0, result, offset, array.length);
+            offset += array.length;
+        }
+        return result;
     }
 
     public class AsyncClass extends AsyncTask<ArrayList<String>, Void, ArrayList<String>> {
@@ -180,7 +202,7 @@ public class Login extends AppCompatActivity {
                         rd.close();
                         newRes.add(result.toString());
                     }
-                } else {
+                } else if (topicForFeed.equals("Technology")) {
                     for (int i = 0; i < technologySources.length; i++) {
                         StringBuilder result = new StringBuilder();
                         url = new URL("https://newsapi.org/v1/articles?source=" + technologySources[i] + "&sortBy=top&apiKey=5af1a6765ca944788b515339c1b990ea");
@@ -194,6 +216,18 @@ public class Login extends AppCompatActivity {
                         rd.close();
                         newRes.add(result.toString());
                     }
+                } else {
+                    StringBuilder result = new StringBuilder();
+                    url = new URL("https://newsapi.org/v1/sources");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String line;
+                    while ((line = rd.readLine()) != null) {
+                        result.append(line);
+                    }
+                    rd.close();
+                    newRes.add(result.toString());
                 }
                 return newRes;
             } catch (Exception e) {
@@ -203,50 +237,115 @@ public class Login extends AppCompatActivity {
             }
         }
 
+        private HashMap<String, String> niceToReal = new HashMap<>();
+
         @Override
         protected void onPostExecute(ArrayList<String> some) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-            try {
-                int length = some.size();
-                JSONObject[] objects = new JSONObject[length];
-                int count = 0;
-                for (String thing: some) {
-                    objects[count] = new JSONObject(thing);
-                    count++;
-                }
-                for (int i = 0; i < length; i++) {
-                    String source = objects[i].get("source").toString();
-                    source.replace("-", " ");
-                    feed1.append(source + "\n");
-                    JSONArray arr = objects[i].getJSONArray("articles");
-                    int newCounter = counter % arr.length();
-                    URL url = new URL(((JSONObject) arr.get(newCounter)).get("urlToImage").toString());
-                    InputStream is = (InputStream) url.getContent();
-                    Drawable d = Drawable.createFromStream(is, "src name");
-                    d.setBounds(0, 0, 1000, 600);
-                    SpannableString ss2 = new SpannableString("                " + "\n");
-                    ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                    feed1.append(ss2);
-                    StringBuilder s3 = new StringBuilder();
-                    for (int p = 0; p < 65; p++) {
-                        s3.append("_");
+            if (topicForFeed.equals("publication")) {
+                try {
+                    AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
+                        public void onItemClick(AdapterView parent, View v, int position, long id) {
+                            Log.d("creator", parent.getItemAtPosition(position).toString());
+                            setContentView(R.layout.feed);
+                            feed1 = (TextView) findViewById(R.id.feedtv1);
+                            try {
+                                StringBuilder result = new StringBuilder();
+                                URL url = new URL("https://newsapi.org/v1/articles?source=" + niceToReal.get(parent.getItemAtPosition(position).toString()) + "&sortBy=top&apiKey=5af1a6765ca944788b515339c1b990ea");
+                                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                                conn.setRequestMethod("GET");
+                                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                                String line;
+                                while ((line = rd.readLine()) != null) {
+                                    result.append(line);
+                                }
+                                rd.close();
+                                JSONArray arts = (new JSONObject(result.toString())).getJSONArray("articles");
+                                feed1.append(parent.getItemAtPosition(position).toString() + "\n\n");
+                                for (int y = 0; y < arts.length(); y++) {
+                                    URL url1 = new URL(((JSONObject) arts.get(y)).get("urlToImage").toString());
+                                    InputStream is = (InputStream) url1.getContent();
+                                    Drawable d = Drawable.createFromStream(is, "src name");
+                                    d.setBounds(0, 0, 1000, 600);
+                                    SpannableString ss2 = new SpannableString("                " + "\n");
+                                    ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                                    feed1.append(ss2);
+                                    StringBuilder s3 = new StringBuilder();
+                                    for (int p = 0; p < 65; p++) {
+                                        s3.append("_");
+                                    }
+                                    String addText = ((JSONObject) arts.get(y)).get("title").toString() + "\n";
+                                    SpannableString ss1 = new SpannableString(addText);
+                                    ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
+                                    ss1.setSpan(new ForegroundColorSpan(Color.BLACK), 0, addText.length(), 0);
+                                    String addURL = ((JSONObject) arts.get(y)).get("url").toString();
+                                    ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    feed1.append(ss1);
+                                    feed1.append(s3 + "\n\n");
+                                    feed1.setClickable(true);
+                                    feed1.setLinksClickable(true);
+                                    feed1.setMovementMethod(LinkMovementMethod.getInstance());
+                                }
+                            } catch (Exception e) {
+                                feed1.append(e.toString() + "    7");
+                            }
+                        }
+                    };
+                    JSONArray pubs = (new JSONObject(some.get(0))).getJSONArray("sources");
+                    String[] adapt = new String[pubs.length()];
+                    for (int i = 0; i < pubs.length(); i++) {
+                        JSONObject newOne = pubs.getJSONObject(i);
+                        adapt[i] = (String) newOne.get("name");
+                        niceToReal.put(adapt[i], (String) newOne.get("id"));
                     }
-                    String addText = ((JSONObject) arr.get(newCounter)).get("title").toString() +"\n";
-                    SpannableString ss1 = new SpannableString(addText);
-                    ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
-                    ss1.setSpan(new ForegroundColorSpan(Color.BLACK), 0, addText.length(), 0);
-                    String addURL = ((JSONObject) arr.get(newCounter)).get("url").toString();
-                    ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    feed1.append(ss1);
-                    feed1.append(s3 + "\n\n");
-                    feed1.setClickable(true);
-                    feed1.setLinksClickable(true);
-                    feed1.setMovementMethod(LinkMovementMethod.getInstance());
+                    ArrayAdapter arrayForList = new ArrayAdapter(Login.this, android.R.layout.simple_list_item_1, adapt);
+                    list1.setAdapter(arrayForList);
+                    list1.setOnItemClickListener(mMessageClickedHandler);
+                } catch (Exception e) {
+                    feed1.setText(e.toString());
                 }
-
-            } catch (Exception e) {
-                feed1.setText(e.toString() + "\n\n");
+            } else {
+                try {
+                    int length = some.size();
+                    JSONObject[] objects = new JSONObject[length];
+                    int count = 0;
+                    for (String thing : some) {
+                        objects[count] = new JSONObject(thing);
+                        count++;
+                    }
+                    for (int i = 0; i < length; i++) {
+                        String source = objects[i].get("source").toString();
+                        source.replace("-", " ");
+                        feed1.append(source + "\n");
+                        JSONArray arr = objects[i].getJSONArray("articles");
+                        int newCounter = counter % arr.length();
+                        URL url = new URL(((JSONObject) arr.get(newCounter)).get("urlToImage").toString());
+                        InputStream is = (InputStream) url.getContent();
+                        Drawable d = Drawable.createFromStream(is, "src name");
+                        d.setBounds(0, 0, 1000, 600);
+                        SpannableString ss2 = new SpannableString("                " + "\n");
+                        ss2.setSpan(new ImageSpan(d), 10, 13, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        feed1.append(ss2);
+                        StringBuilder s3 = new StringBuilder();
+                        for (int p = 0; p < 65; p++) {
+                            s3.append("_");
+                        }
+                        String addText = ((JSONObject) arr.get(newCounter)).get("title").toString() + "\n";
+                        SpannableString ss1 = new SpannableString(addText);
+                        ss1.setSpan(new RelativeSizeSpan(1.5f), 0, addText.length(), 0);
+                        ss1.setSpan(new ForegroundColorSpan(Color.BLACK), 0, addText.length(), 0);
+                        String addURL = ((JSONObject) arr.get(newCounter)).get("url").toString();
+                        ss1.setSpan(new URLSpan(addURL), 0, addText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        feed1.append(ss1);
+                        feed1.append(s3 + "\n\n");
+                        feed1.setClickable(true);
+                        feed1.setLinksClickable(true);
+                        feed1.setMovementMethod(LinkMovementMethod.getInstance());
+                    }
+                } catch (Exception e) {
+                    feed1.setText(e.toString() + "\n\n");
+                }
             }
         }
     }
